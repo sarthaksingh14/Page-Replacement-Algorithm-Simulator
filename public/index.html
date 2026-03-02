@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MemOS — Page Replacement Simulator</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <!-- ── Loading Screen ────────────────────────────────────────────── -->
+    <div id="loader">
+      <div class="loader-logo">MemOS</div>
+      <div class="loader-bar"><div class="loader-fill"></div></div>
+      <div class="loader-text">INITIALIZING MEMORY SYSTEM</div>
+    </div>
+
+    <!-- ── Dataveyes Particle Network Canvas ─────────────────────────── -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- ── HERO ──────────────────────────────────────────────────────── -->
+    <section id="hero">
+      <div class="floating-blocks"></div>
+
+      <div class="hero-badge">OS LEARNING PLATFORM</div>
+
+      <h1 class="hero-title">
+        <span class="line1">Visualize Memory.</span>
+        <span class="line2">Master Algorithms.</span>
+      </h1>
+
+      <p class="hero-sub">
+        Watch FIFO, LRU, and Optimal page replacement come alive with
+        frame-by-frame animation, live stats, and intelligent comparison.
+      </p>
+
+      <div class="hero-cta">
+        <button class="btn-primary" onclick="scrollToSection('simulator')">
+          ⚡ Start Simulation
+        </button>
+
+        <button class="btn-secondary" onclick="scrollToSection('how-it-works')">
+          Learn Algorithms
+        </button>
+      </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="num">3</span>
+          <span class="label">Algorithms</span>
+        </div>
+        <div class="hero-stat">
+          <span class="num">∞</span>
+          <span class="label">Sequences</span>
+        </div>
+        <div class="hero-stat">
+          <span class="num">1:1</span>
+          <span class="label">Animation</span>
+        </div>
+      </div>
+
+      <div class="scroll-hint">
+        Scroll to explore
+        <div class="scroll-arrow"></div>
+      </div>
+    </section>
+
+    <!-- ── HOW IT WORKS ───────────────────────────────────────────────── -->
+    <section id="how-it-works">
+      <div class="section-label fade-el">// ALGORITHMS</div>
+      <h2 class="section-title fade-el">How Each Algorithm Works</h2>
+
+      <div class="algo-cards">
+        <div
+          class="algo-card fade-el"
+          onclick="
+            selectAlgo('fifo');
+            scrollToSection('simulator');
+          "
+        >
+          <div class="algo-icon fifo-icon">📦</div>
+          <h3>FIFO</h3>
+          <p>
+            First In, First Out — the simplest strategy. The page that has been
+            in memory the longest is replaced first, regardless of how recently
+            or frequently it was used.
+          </p>
+          <span class="algo-tag tag-cyan">FIRST IN FIRST OUT</span>
+        </div>
+
+        <div
+          class="algo-card fade-el"
+          onclick="
+            selectAlgo('lru');
+            scrollToSection('simulator');
+          "
+        >
+          <div class="algo-icon lru-icon">🔁</div>
+          <h3>LRU</h3>
+          <p>
+            Least Recently Used — replaces the page that hasn't been accessed
+            for the longest time. Approximates the optimal algorithm using past
+            usage patterns.
+          </p>
+          <span class="algo-tag tag-purple">LEAST RECENTLY USED</span>
+        </div>
+
+        <div
+          class="algo-card fade-el"
+          onclick="
+            selectAlgo('optimal');
+            scrollToSection('simulator');
+          "
+        >
+          <div class="algo-icon opt-icon">🎯</div>
+          <h3>Optimal</h3>
+          <p>
+            The theoretical best — replaces the page that will not be used for
+            the longest time in the future. Serves as a benchmark; impossible to
+            implement in real OS without future knowledge.
+          </p>
+          <span class="algo-tag tag-green">BELADY'S ALGORITHM</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SIMULATOR ─────────────────────────────────────────────────── -->
+    <section id="simulator">
+      <div class="section-label fade-el">// INTERACTIVE SIMULATION</div>
+      <h2 class="section-title fade-el">Live Memory Visualizer</h2>
+
+      <div class="sim-layout">
+        <!-- Input Panel -->
+        <div class="input-panel">
+          <div class="panel-title">⚙ CONFIGURATION</div>
+
+          <div class="form-group">
+            <label class="form-label">Page Reference String</label>
+            <input
+              type="text"
+              id="pageInput"
+              class="form-input"
+              placeholder="7 0 1 2 0 3 0 4 2 3"
+              value="7 0 1 2 0 3 0 4 2 3 0 3 2 1 2"
+            />
+            <div class="input-hint">
+              Separate page numbers with spaces (max 30)
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Number of Frames</label>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="frameSlider"
+                class="slider"
+                min="1"
+                max="8"
+                value="3"
+                oninput="updateFrameVal()"
+              />
+              <span class="slider-val" id="frameVal">3</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Algorithm</label>
+            <div class="algo-buttons">
+              <button
+                class="algo-btn active"
+                id="btn-fifo"
+                onclick="selectAlgo('fifo')"
+              >
+                FIFO
+              </button>
+              <button class="algo-btn" id="btn-lru" onclick="selectAlgo('lru')">
+                LRU
+              </button>
+              <button
+                class="algo-btn"
+                id="btn-optimal"
+                onclick="selectAlgo('optimal')"
+              >
+                OPTIMAL
+              </button>
+            </div>
+          </div>
+
+          <button id="runBtn" onclick="runSimulation()">
+            ▶ RUN SIMULATION
+          </button>
+          <button id="compareBtn" onclick="runComparison()">
+            ⇄ COMPARE ALL ALGORITHMS
+          </button>
+
+          <div class="playback" id="playbackCtrl" style="display: none">
+            <button class="pb-btn" onclick="stepBack()" title="Step Back">
+              ⟵
+            </button>
+            <button
+              class="pb-btn"
+              id="playPauseBtn"
+              onclick="togglePlay()"
+              title="Play/Pause"
+            >
+              ▶
+            </button>
+            <button class="pb-btn" onclick="stepForward()" title="Step Forward">
+              ⟶
+            </button>
+            <button class="pb-btn" onclick="resetSim()" title="Reset">↺</button>
+            <div class="pb-speed">
+              <button class="speed-btn" onclick="setSpeed(2000)">0.5×</button>
+              <button
+                class="speed-btn active"
+                id="spd1"
+                onclick="setSpeed(1000)"
+              >
+                1×
+              </button>
+              <button class="speed-btn" onclick="setSpeed(400)">2×</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulation Panel -->
+        <div class="sim-panel">
+          <!-- Timeline -->
+          <div class="timeline-panel">
+            <div class="timeline-label">📍 Page Reference Timeline</div>
+            <div class="timeline-scroll">
+              <div class="timeline-track" id="timelineTrack">
+                <div
+                  class="timeline-item"
+                  style="
+                    color: var(--text-muted);
+                    font-size: 12px;
+                    width: auto;
+                    padding: 0 16px;
+                  "
+                >
+                  Configure & run simulation to see the timeline
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Stats -->
+          <div class="live-stats">
+            <div class="live-stat stat-faults">
+              <span class="stat-val" id="liveFaults">—</span>
+              <span class="stat-label">Page Faults</span>
+            </div>
+            <div class="live-stat stat-hits">
+              <span class="stat-val" id="liveHits">—</span>
+              <span class="stat-label">Page Hits</span>
+            </div>
+            <div class="live-stat stat-eff">
+              <span class="stat-val" id="liveEff">—</span>
+              <span class="stat-label">Hit Rate</span>
+            </div>
+          </div>
+
+          <!-- Memory Frames -->
+          <div class="frames-panel">
+            <div class="frames-header">
+              <div class="frames-label">🧱 Memory Frames</div>
+              <div class="step-counter">
+                Step <span id="stepNum">0</span> /
+                <span id="totalSteps">0</span>
+              </div>
+            </div>
+            <div class="frames-row" id="framesRow">
+              <div class="welcome-state">
+                <div class="welcome-icon">💾</div>
+                <h3>Memory frames will appear here</h3>
+                <p>Enter a page sequence and hit Run Simulation</p>
+              </div>
+            </div>
+            <div class="status-bar" id="statusBar" style="display: none"></div>
+          </div>
+
+          <!-- Step Table -->
+          <div class="table-panel" id="tablePanel" style="display: none">
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 16px;
+              "
+            >
+              <div class="timeline-label">📋 Step-by-Step Trace</div>
+              <button
+                class="btn-secondary"
+                style="padding: 6px 14px; font-size: 11px"
+                onclick="toggleTable()"
+              >
+                Toggle
+              </button>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Step</th>
+                    <th>Page</th>
+                    <th id="tableFrameHeaders"></th>
+                    <th>Status</th>
+                    <th>Replaced</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── COMPARISON ─────────────────────────────────────────────────── -->
+    <section id="comparison">
+      <div class="section-label fade-el">// RESULTS</div>
+      <h2 class="section-title fade-el">Algorithm Comparison</h2>
+
+      <div class="compare-grid" id="compareGrid">
+        <div
+          class="compare-card fade-el"
+          style="grid-column: 1/-1; text-align: center; padding: 60px"
+        >
+          <div style="font-size: 48px; margin-bottom: 16px">📊</div>
+          <h3 style="font-family: var(--font-display); color: var(--text-dim)">
+            Run comparison to see results
+          </h3>
+          <p
+            style="color: var(--text-muted); margin-top: 8px; font-size: 0.9rem"
+          >
+            Click "Compare All Algorithms" in the simulator above
+          </p>
+        </div>
+      </div>
+
+      <div class="bar-chart" id="barChart" style="display: none">
+        <div class="bar-chart-title">PAGE FAULTS PER ALGORITHM</div>
+        <div class="chart-bars" id="chartBars"></div>
+      </div>
+    </section>
+
+    <!-- ── FOOTER ─────────────────────────────────────────────────────── -->
+    <footer>
+      <span>MemOS</span> — Interactive OS Memory Simulator &nbsp;|&nbsp; Built
+      with Node.js + Express &nbsp;|&nbsp; <span>LPU 2028 🚀</span>
+    </footer>
+
+    <!-- ── Toast ──────────────────────────────────────────────────────── -->
+    <div id="toast"></div>
+
+    <script src="js/main.js"></script>
+  </body>
+</html>
