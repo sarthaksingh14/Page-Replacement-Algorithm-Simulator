@@ -19,7 +19,12 @@
  * @returns {{ steps, faults, hits }} - Full step-by-step trace + summary
  */
 function fifo(pages, frameCount) {
-
+  if (!Array.isArray(pages) || pages.length === 0) {
+    throw new Error('Pages must be a non-empty array');
+  }
+  if (frameCount < 1) {
+    throw new Error('Frame count must be at least 1');
+  }
   // frames[] holds the pages currently in memory.
   // null means the slot is empty (not yet loaded).
   const frames = new Array(frameCount).fill(null);
